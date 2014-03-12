@@ -11,6 +11,6 @@ install.packages("devtools")
 
 library(devtools)
 
-install_github("TextWiller", "livioivil")
+install_github("twitteRutils", "matteoredaelli")
 
-library(TextWiller)
+library(twitteRutils)
