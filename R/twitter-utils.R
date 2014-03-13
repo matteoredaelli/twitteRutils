@@ -163,7 +163,7 @@ twChartAgents <- function(df, output.dir=".", output.file="agents.png", width=10
 ##########
 twChartAuthors <- function(df, output.dir=".", output.file="authors.png", width=1000, height=500, color="red", top=10) {
     filename <- file.path(output.dir, output.file)
-    sources = twTopContributors(df, top=top)
+    sources = twTopUsers(df, top=top)
     png(filename, width=width, height=height, units="px")
     p <- barchart(sources, col=color, xlab="tweets", ylab="people")
     print(p)
