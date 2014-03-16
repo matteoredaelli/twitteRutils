@@ -1,9 +1,9 @@
 Package: twitteRutils
 Type: Package
-Title: What the package does (short line)
+Title: Useful functions for twitter data
 Version: 1.0
 Date: 2014-03-10
 Author: Matteo Redaelli
 Maintainer: Matteo Redaelli <Matteo.Redaelli@gmail.com>
-Description: More about what it does (maybe more than one line)
-License: GPL (>=2)
+Description: Useful functions for twitter data
+License: GPL (>=3)
