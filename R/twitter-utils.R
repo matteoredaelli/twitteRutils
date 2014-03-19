@@ -32,7 +32,7 @@ dfToText <- function(df, sep=":", eol=",", row.names=TRUE, col.names=FALSE, quot
 
 twNormalizeDate <- function(df, tz) {
     df$created <- as.POSIXct(format(df$created, tz=tz, usetz=TRUE))
-    df <- tweets_df[with(df, order(created)), ]
+    df <- df[with(df, order(created)), ]
     #df <- df[37:nrow(df),]
     return(df)
 }
