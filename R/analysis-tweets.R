@@ -1,4 +1,4 @@
-AnalyzeTimeline <- function(tweets.df, top=10, stopwords=stopwords("english"), tz="Europe/Rome", output.dir=".", chart.color="red", chart.width=1000, chart.height=1000) {
+AnalyzeTweets <- function(tweets.df, top=10, stopwords=stopwords("english"), tz="Europe/Rome", output.dir=".", chart.color="red", chart.width=1000, chart.height=1000) {
   
   df <- twNormalizeDate(tweets.df, tz)
   

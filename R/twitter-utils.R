@@ -11,18 +11,6 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-library(lattice)
-library(stringr)
-library(ggplot2)
-library(reshape2)
-library(igraph)
-library(tm)
-library(wordcloud)
-library(RColorBrewer)
-library(cluster)
-library(FactoMineR)
-
-
 dfToText <- function(df, sep=":", eol=",", row.names=TRUE, col.names=FALSE, quote=FALSE) {
     if(is.na(df) || is.null(df) || length(df) == 0)
         return(NA)
