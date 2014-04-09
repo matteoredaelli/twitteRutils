@@ -214,7 +214,7 @@ twChartInfluencers <- function(df, output.dir=".", output.file="influencers.png"
     png(filename, width=width, height=height, units="px")
     p <- ggplot(m2, aes(x=tweets, y=retweets, size=replies, label=User),legend=FALSE) +
         geom_point(colour="white", fill="red", shape=21) +
-            geom_text(size=4)+ theme_bw()
+            geom_text(size=4)+ theme_bw() + theme(axis.text.x = element_text(colour = 'black'), axis.text.y = element_text(colour = 'black')) 
     print(p)
     dev.off()
 
@@ -227,7 +227,7 @@ twChartInfluencers <- function(df, output.dir=".", output.file="influencers.png"
     png(filename, width=width, height=height, units="px")
     p <- ggplot(m2.melt, aes(x = User, y = value, color = variable)) + geom_point() + 
         coord_flip() + ggtitle("Counts of tweets, retweets, and messages") +
-            xlab("Counts") + ylab("Users")
+            xlab("Counts") + ylab("Users")  + theme(axis.text.x = element_text(colour = 'black'), axis.text.y = element_text(colour = 'black'))
     print(p)
     dev.off()
 }
