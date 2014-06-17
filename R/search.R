@@ -28,9 +28,9 @@
 ## ############################################
 ## searchOne
 ## ############################################
-searchOne <- function(config.twitter, id, q, out.dir=".", geocode=NULL, lang=NULL) {
-    file.ids <- file.path(out.dir, sprintf("%s.csv", id))
-    file.sinceID <- file.path(out.dir, sprintf("%s.sinceID", id))
+searchOne <- function(config.twitter, q, out.dir=".", geocode=NULL, lang=NULL) {
+    file.ids <- file.path(out.dir, "tweets-ids.csv")
+    file.sinceID <- file.path(out.dir, ".id")
 
     if( !is.null(geocode) && (is.na(geocode) || geocode=='')) geocode <- NULL
     if( !is.null(lang)    && (is.na(lang)    || lang==''))    lang <- NULL
