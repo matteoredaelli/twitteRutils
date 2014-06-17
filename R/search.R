@@ -25,21 +25,41 @@
 ##
 ##
 
-## ############################################
-## searchOne
-## ############################################
-searchOne <- function(config.twitter, q, out.dir=".", geocode=NULL, lang=NULL) {
-    file.ids <- file.path(out.dir, "tweets-ids.csv")
-    file.sinceID <- file.path(out.dir, ".id")
+library(twitteR)
 
-    if( !is.null(geocode) && (is.na(geocode) || geocode=='')) geocode <- NULL
-    if( !is.null(lang)    && (is.na(lang)    || lang==''))    lang <- NULL
+.twLogin <- function(config.twitter) {
     loginfo("connecting to twitter APIs...")
     setup_twitter_oauth(consumer_key    = config.twitter$consumer_key,
                         consumer_secret = config.twitter$consumer_secret,
                         access_token    = config.twitter$access_token,
                         access_secret   = config.twitter$access_secret,
                         credentials_file=NULL)
+   }
+
+.getFilenameTweetsIDs <- function(dir) {
+    file.path(dir, "tweets-ids.csv")
+}
+
+.getFilenameSinceID <- function(dir) {
+    file.path(dir, ".sinceID")
+}
+
+.getFilenameDump <- function(dir) {
+    file.path(dir, "search.Rdata")
+}
+
+## ###############################################################
+## twSearch
+## ###############################################################
+twSearch <- function(config.twitter, q, out.dir=".", geocode=NULL, lang=NULL) {
+
+    if( !is.null(geocode) && (is.na(geocode) || geocode=='')) geocode <- NULL
+    if( !is.null(lang)    && (is.na(lang)    || lang==''))    lang <- NULL
+
+    file.ids <- .getFilenameTweetsIDs(out.dir)
+    file.sinceID <- getFilenameSinceID(out.dir)
+
+    .twLogin(config.twitter)
 
     sinceID=0
 
@@ -59,4 +79,20 @@ searchOne <- function(config.twitter, q, out.dir=".", geocode=NULL, lang=NULL) {
         sinceID=tail(t.ids, n=1)
         cat(sprintf("%s\n", sinceID), file=file.sinceID, append=FALSE)
     }
+}
+
+## ###############################################################
+## twSearchDump
+## ###############################################################
+twSearchDump <- function(config.twitter, q, out.dir=".", rename.csv=TRUE) {
+    
+    file.ids  <- .getFilenameTweetsIDs(out.dir)
+    file.dump <- .getFilenameDump(out.dir)
+
+    if(not file.exists(file.ids)) {
+       logwarn("Missing tweets IDs file: dumping is not possible" )
+       return(1)
+    }
+    tweets.ids <- read.csv(file.ids, header=FALSE)
+    .twLogin(config.twitter)
 }
