@@ -26,73 +26,109 @@
 ##
 
 library(twitteR)
+library(RSQLite)
+library(logging)
 
-.twLogin <- function(config.twitter) {
-    loginfo("connecting to twitter APIs...")
-    setup_twitter_oauth(consumer_key    = config.twitter$consumer_key,
-                        consumer_secret = config.twitter$consumer_secret,
-                        access_token    = config.twitter$access_token,
-                        access_secret   = config.twitter$access_secret,
-                        credentials_file=NULL)
+.twLogin <- function(twitter.creds) {
+    ##loginfo("connecting to twitter APIs...")
+    ##setup_twitter_oauth(consumer_key    = config.twitter$consumer_key,
+    ##                    consumer_secret = config.twitter$consumer_secret,
+    ##                    access_token    = config.twitter$access_token,
+    ##                    access_secret   = config.twitter$access_secret,
+    ##                    credentials_file=NULL)
+    load_twitter_oauth(twitter.creds)
    }
 
-.getFilenameTweetsIDs <- function(dir) {
-    file.path(dir, "tweets-ids.csv")
+.getFilenameSearchDB <- function(dir) {
+    file.path(dir, "search.db")
 }
 
 .getFilenameSinceID <- function(dir) {
-    file.path(dir, ".sinceID")
+  file.path(dir, "sinceID.RData")
+}
+.getFilenameSearchDump <- function(dir) {
+    file.path(dir, "search.RData")
 }
 
-.getFilenameDump <- function(dir) {
-    file.path(dir, "search.Rdata")
+.loadSinceID <- function(dir) {
+  file.sinceID <- .getFilenameSinceID(dir)
+  if(file.exists(file.sinceID)) {
+    load(file.sinceID)
+  } else {
+    sinceID <- 0
+  }
 }
 
+.saveSinceID <- function(sinceID, dir) {
+  file.sinceID <- .getFilenameSinceID(dir)
+  save(sinceID, filename=file.sinceID)
+}
+
+.twDbConnect <- function(dir) {
+    file.db <- .getFilenameSearchDB(dir)
+    drv <- dbDriver("SQLite")
+    conn <- dbConnect(drv, dbname = file.db)
+    if(! dbExistsTable(conn, "tweets")) {
+        ## create table tweets
+
+        sql <- "CREATE TABLE tweets (
+  text text,
+  favorited BOOLEAN DEFAULT NULL,
+  favoriteCount float DEFAULT NULL,
+  replyToSN varchar(50),
+  created datetime,
+  truncated tinyint(4) DEFAULT NULL,
+  replyToSID varchar(30) not NULL,
+  id varchar(30) not NULL,
+  replyToUID varchar(30) not NULL,
+  statusSource varchar(300),
+  screenName varchar(50),
+  retweetCount float DEFAULT NULL,
+  isRetweet BOOLEAN DEFAULT NULL,
+  retweeted BOOLEAN DEFAULT NULL,
+  longitude float,
+  latitude float,
+  PRIMARY KEY (id)
+)"
+        rs <- dbSendQuery(conn, sql)
+        dbClearResult(rs)
+        
+    }
+    return(conn)
+}
+
+.twDbDisconnect <- function(conn) {
+    dbDisconnect(conn)
+}
+    
 ## ###############################################################
-## twSearch
+## twIncrementalSearch
 ## ###############################################################
-twSearch <- function(config.twitter, q, out.dir=".", geocode=NULL, lang=NULL) {
+twIncrementalSearch <- function(twitter.creds, q, out.dir=".", geocode=NULL, lang=NULL) {
 
     if( !is.null(geocode) && (is.na(geocode) || geocode=='')) geocode <- NULL
     if( !is.null(lang)    && (is.na(lang)    || lang==''))    lang <- NULL
 
-    file.ids <- .getFilenameTweetsIDs(out.dir)
-    file.sinceID <- getFilenameSinceID(out.dir)
-
-    .twLogin(config.twitter)
-
-    sinceID=0
-
-    if(file.exists(file.sinceID)) {
-       logwarn(sprintf("Loading sinceID from file %s", file.sinceID))
-       sinceID <- read.table(file.sinceID)[1,1]
-    }
-
+    .twLogin(twitter.creds)  
+    sinceID <- .loadSinceID(out.dir)
     logwarn(sprintf("Searching for q=%s, sinceID=%s", q, sinceID))
-    t<- searchTwitter(q, n=1500, sinceID=sinceID, geocode=geocode, lang=lang)
-
-    if( length(t) == 0) {
-        logwarn(sprintf("No tweets found searching for q=%s, sinceID=%s", q, sinceID))
+    tweets <- searchTwitter(q, n=1500, sinceID=sinceID, geocode=geocode, lang=lang)
+    len <- length(tweets)
+    logwarn(sprintf("Found %d tweets searching for q=%s, sinceID=%s", length, q, sinceID))
+    if( len == 0) {
+        logwarn("No tweets no save to DB")
     } else {
-        t.ids <- unlist(lapply(t, function(x) x$id))
-        write.table(t.ids, file=file.ids, append=TRUE, row.names=FALSE, col.names=FALSE, quote=FALSE)
-        sinceID=tail(t.ids, n=1)
-        cat(sprintf("%s\n", sinceID), file=file.sinceID, append=FALSE)
+        ## db setup
+        logwarn("..Connecting to database..")
+        conn <- .twDbConnect(out.dir)
+        tweets.df <- twListToDF(tweets)
+        logwarn("..Saving tweets to DB table tweets..")
+        dbWriteTable(conn, "tweets", tweets.df, row.names=FALSE, append=TRUE)
+        .twDbDisconnect(conn)
+        logwarn("..Updating sinceID file")
+        sinceID=max(tweets.df$id)
+        .saveSinceID(sinceID, out.dir)
     }
+
 }
 
-## ###############################################################
-## twSearchDump
-## ###############################################################
-twSearchDump <- function(config.twitter, q, out.dir=".", rename.csv=TRUE) {
-    
-    file.ids  <- .getFilenameTweetsIDs(out.dir)
-    file.dump <- .getFilenameDump(out.dir)
-
-    if(not file.exists(file.ids)) {
-       logwarn("Missing tweets IDs file: dumping is not possible" )
-       return(1)
-    }
-    tweets.ids <- read.csv(file.ids, header=FALSE)
-    .twLogin(config.twitter)
-}

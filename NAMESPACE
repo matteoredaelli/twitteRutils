@@ -1,1 +1,5 @@
 exportPattern("^[[:alpha:]]+")
+
+import(twitteR)
+import(RSQLite)
+import(logging)
