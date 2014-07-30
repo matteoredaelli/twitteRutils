@@ -57,17 +57,17 @@ library(logging)
   } else {
     sinceID <- 0
   }
+  return(sinceID)
 }
 
 .saveSinceID <- function(sinceID, dir) {
   file.sinceID <- .getFilenameSinceID(dir)
-  save(sinceID, filename=file.sinceID)
+  save(sinceID, file=file.sinceID)
 }
 
 .twDbConnect <- function(dir) {
     file.db <- .getFilenameSearchDB(dir)
-    drv <- dbDriver("SQLite")
-    conn <- dbConnect(drv, dbname = file.db)
+    conn <- dbConnect(SQLite(), dbname = file.db)
     if(! dbExistsTable(conn, "tweets")) {
         ## create table tweets
 
@@ -78,9 +78,9 @@ library(logging)
   replyToSN varchar(50),
   created datetime,
   truncated tinyint(4) DEFAULT NULL,
-  replyToSID varchar(30) not NULL,
+  replyToSID varchar(30) DEFAULT NULL,
   id varchar(30) not NULL,
-  replyToUID varchar(30) not NULL,
+  replyToUID varchar(30) DEFAULT NULL,
   statusSource varchar(300),
   screenName varchar(50),
   retweetCount float DEFAULT NULL,
@@ -114,7 +114,10 @@ twIncrementalSearch <- function(twitter.creds, q, out.dir=".", geocode=NULL, lan
     logwarn(sprintf("Searching for q=%s, sinceID=%s", q, sinceID))
     tweets <- searchTwitter(q, n=1500, sinceID=sinceID, geocode=geocode, lang=lang)
     len <- length(tweets)
-    logwarn(sprintf("Found %d tweets searching for q=%s, sinceID=%s", length, q, sinceID))
+    logwarn(sprintf("Found %d tweets searching for q=%s, sinceID=%s", 
+                    len, 
+                    q, 
+                    as.character(sinceID)))
     if( len == 0) {
         logwarn("No tweets no save to DB")
     } else {
@@ -122,6 +125,7 @@ twIncrementalSearch <- function(twitter.creds, q, out.dir=".", geocode=NULL, lan
         logwarn("..Connecting to database..")
         conn <- .twDbConnect(out.dir)
         tweets.df <- twListToDF(tweets)
+        tweets.df$text <- twUTF8FixText(tweets.df$text)
         logwarn("..Saving tweets to DB table tweets..")
         dbWriteTable(conn, "tweets", tweets.df, row.names=FALSE, append=TRUE)
         .twDbDisconnect(conn)
