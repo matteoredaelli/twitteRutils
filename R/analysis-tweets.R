@@ -11,6 +11,16 @@
 ##    You should have received a copy of the GNU General Public License
 ##    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+library(lattice)
+library(stringr)
+library(ggplot2)
+library(reshape2)
+library(igraph)
+library(tm)
+library(wordcloud)
+library(RColorBrewer)
+library(cluster)
+library(FactoMineR)
 
 AnalyzeTweets <- function(tweets.df, top=10, stopwords=stopwords("english"), tz="Europe/Rome", output.dir=".", chart.color="red", chart.width=1000, chart.height=1000) {
   
@@ -43,7 +53,7 @@ AnalyzeTweets <- function(tweets.df, top=10, stopwords=stopwords("english"), tz=
   twChartWordcloud(table=twTopWords(text, top=20),
                        width=chart.width, height=chart.height, 
                        output.dir=output.dir,
-                       output.file="wordcloud-hashtags.png")
+                       output.file="wordcloud-words.png")
   twChartWordcloud(table=twTopHashtags(df$text, top=20),
                        width=chart.width, height=chart.height, 
                        output.dir=output.dir,
