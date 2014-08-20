@@ -22,7 +22,7 @@ library(RColorBrewer)
 library(cluster)
 library(FactoMineR)
 
-AnalyzeTweets <- function(tweets.df, top=10, stopwords=stopwords("english"), tz="Europe/Rome", output.dir=".", chart.color="red", chart.width=1000, chart.height=1000) {
+AnalyzeTweets <- function(tweets.df, top=10, my.stopwords=stopwords("english"), tz="Europe/Rome", output.dir=".", chart.color="red", chart.width=1000, chart.height=1000) {
   
   df <- twNormalizeDate(tweets.df, tz)
   
@@ -48,7 +48,7 @@ AnalyzeTweets <- function(tweets.df, top=10, stopwords=stopwords("english"), tz=
                          output.file="influencers-excluding-topscores-1.png")
   text = df$text
   text <- twCleanText(text)
-  tdm.matrix <- twBuildTDMMatrix(text, stopwords=stopwords)
+  tdm.matrix <- twBuildTDMMatrix(text, stopwords=my.stopwords)
   
   twChartWordcloud(table=twTopWords(text, top=20),
                        width=chart.width, height=chart.height, 
