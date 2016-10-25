@@ -11,6 +11,6 @@ install.packages("devtools")
 
 library(devtools)
 
-install_github("twitteRutils", "matteoredaelli")
+install_github("matteoredaelli/twitteRutils")
 
 library(twitteRutils)
