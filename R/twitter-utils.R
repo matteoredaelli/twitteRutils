@@ -300,8 +300,8 @@ twChartWordcloud <- function(text=NULL, tdm.matrix=NULL, table=NULL, output.dir=
 
     if(!is.null(table)) {
         d.temp <- as.data.frame(table)
-        word <- d.temp[,1]
-        freq <- d.temp[,2]
+        word <- rownames(d.temp)
+        freq <- d.temp[,1]
     } else {
         if(is.null(tdm.matrix))
             tdm.matrix <- twBuildTDMMatrix(text, stopwords=my.stopwords)
