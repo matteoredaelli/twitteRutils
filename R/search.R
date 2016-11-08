@@ -34,8 +34,7 @@ library(logging)
     ##setup_twitter_oauth(consumer_key    = config.twitter$consumer_key,
     ##                    consumer_secret = config.twitter$consumer_secret,
     ##                    access_token    = config.twitter$access_token,
-    ##                    access_secret   = config.twitter$access_secret,
-    ##                    credentials_file=NULL)
+    ##                    access_secret   = config.twitter$access_secret)
     load_twitter_oauth(twitter.creds)
    }
 
